@@ -41,6 +41,7 @@ import torch
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, BCELoss
 import torch.nn as nn
 import torch.nn.functional as F  # noqa
+from icecream import ic  # noqa
 
 
 def get_loss(name):
@@ -296,8 +297,8 @@ def sensitivity_specificity_loss(y_true, y_pred, w):
     tp = torch.diagonal(confusion_matrix, offset=0)
     fp = sum_along_classified - tp
     fn = sum_along_actual - tp
-    tn = torch.ones(n_classes, dtype=torch.float) * torch.sum(confusion_matrix) - tp - fp - fn
-    smooth = torch.ones(n_classes, dtype=torch.float)  # Use to avoid numeric division error
+    tn = torch.ones(n_classes, dtype=torch.float).to(y_true.device) * torch.sum(confusion_matrix) - tp - fp - fn
+    smooth = torch.ones(n_classes, dtype=torch.float).to(y_true.device)  # Use to avoid numeric division error
     assert tp.shape == fp.shape == fn.shape == tn.shape
     sensitivity = (tp + smooth) / (tp + fn + smooth)
     specificity = (tn + smooth) / (tn + fp + smooth)
